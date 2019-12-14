@@ -1,0 +1,12 @@
+[package]
+name = "font_to_byte_array"
+version = "0.1.0"
+authors = ["KENTARO OKUDA <lonesometraveler@mac.com>"]
+edition = "2018"
+
+[lib]
+name = "font2bytes"
+path = "src/lib.rs"
+
+[dependencies]
+image = "0.22.3"
