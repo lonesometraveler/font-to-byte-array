@@ -36,7 +36,9 @@ impl FontToBytes {
         //         e.path().to_str().map(|s| String::from(s))
         //     )
         // }).collect::<Vec<String>>();
-
+    
+        // help: remove closure as shown: `String::from`
+        // https://rust-lang.github.io/rust-clippy/master/index.html#redundant_closure
         let mut files =
             paths.filter_map(|entry| {
             entry.ok().and_then(|e|
@@ -75,12 +77,11 @@ fn print_array(path: &Path) -> Result<String, &'static str> { // TODO: error han
 
     // let (width, height) = img.dimensions();
 
-    let mut bit_counter: u32 = 0;
     let mut byte: u8 = 0;
 
     let mut output = format!("\r\n{{ // {} \r\n", path.to_str().unwrap());
 
-    for pixel in img.pixels() {
+    for (bit_counter, pixel) in img.pixels().enumerate() {
 
         match pixel {
             Luma([0]) => byte &= 0xFE,
@@ -93,7 +94,6 @@ fn print_array(path: &Path) -> Result<String, &'static str> { // TODO: error han
         }
 
         byte = byte.rotate_left(1);
-        bit_counter += 1;
     }
 
     output = format!("{}\r\n}},", output);
