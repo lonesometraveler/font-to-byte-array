@@ -26,10 +26,8 @@ impl FontToBytes {
             None => return Err("no array name specified. Usage: cargo run path_to_image_folder name_of_array > filename_to_be_saved.h")
         };
 
-        let path = Path::new(&folder);
-        let paths = std::fs::read_dir(&path).unwrap();
-
-        let mut files = paths
+        let mut files = std::fs::read_dir(&Path::new(&folder))
+            .unwrap()
             .filter_map(|entry| {
                 entry.ok().and_then(|e| {
                     e.path()
@@ -38,7 +36,7 @@ impl FontToBytes {
                 })
             })
             .collect::<Vec<String>>();
-        
+
         files.sort();
 
         Ok(FontToBytes {
