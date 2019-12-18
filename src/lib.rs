@@ -26,16 +26,27 @@ impl FontToBytes {
             None => return Err("no array name specified. Usage: cargo run path_to_image_folder name_of_array > filename_to_be_saved.h")
         };
 
-        let mut files = std::fs::read_dir(&Path::new(&folder))
-            .unwrap()
-            .filter_map(|entry| {
-                entry.ok().and_then(|e| {
-                    e.path()
-                        .file_name()
-                        .and_then(|n| n.to_str().map(String::from))
-                })
-            })
-            .collect::<Vec<String>>();
+        // let mut files = std::fs::read_dir(&Path::new(&folder))
+        //     .unwrap()
+        //     .filter_map(|entry| {
+        //         entry.ok().and_then(|e| {
+        //             e.path()
+        //                 .file_name()
+        //                 .and_then(|n| n.to_str().map(String::from))
+        //         })
+        //     })
+        //     .collect::<Vec<String>>();
+
+        let mut files: Vec<String> = vec![];
+        for file in std::fs::read_dir(&Path::new(&folder)).unwrap() {
+            let path = file.unwrap().path();
+            if path.extension() == Some(std::ffi::OsStr::new("png")) {
+                let file_name = path
+                    .file_name()
+                    .and_then(|name| name.to_str().map(String::from));
+                files.push(file_name.unwrap());
+            }
+        }
 
         files.sort();
 
