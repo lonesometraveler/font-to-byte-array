@@ -1,7 +1,3 @@
 /target
 **/*.rs.bk
 Cargo.lock
-
-font_17px/116.png
-*.png
-font_17px/wrong_file.h
