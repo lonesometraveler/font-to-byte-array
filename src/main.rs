@@ -4,10 +4,10 @@ use std::process;
 use font2bytes::FontToBytes;
 
 fn main() {
-    let generator = FontToBytes::new(env::args()).unwrap_or_else(|err| {
+    let writer = FontToBytes::new(env::args()).unwrap_or_else(|err| {
         eprintln!("problem parsing arguments: {}", err);
         process::exit(1);
     });
 
-    println!("{}", generator.run());
+    println!("{}", writer.run());
 }

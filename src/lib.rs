@@ -26,21 +26,10 @@ impl FontToBytes {
             None => return Err("no array name specified. Usage: cargo run path_to_image_folder name_of_array > filename_to_be_saved.h")
         };
 
-        // let mut files = std::fs::read_dir(&Path::new(&folder))
-        //     .unwrap()
-        //     .filter_map(|entry| {
-        //         entry.ok().and_then(|e| {
-        //             e.path()
-        //                 .file_name()
-        //                 .and_then(|n| n.to_str().map(String::from))
-        //         })
-        //     })
-        //     .collect::<Vec<String>>();
-
         let mut files: Vec<String> = vec![];
         for file in std::fs::read_dir(&Path::new(&folder)).unwrap() {
             let path = file.unwrap().path();
-            if path.extension() == Some(std::ffi::OsStr::new("png")) {
+            if is_valid_file(&path) {
                 let file_name = path
                     .file_name()
                     .and_then(|name| name.to_str().map(String::from));
@@ -75,7 +64,7 @@ impl FontToBytes {
         format!("{}\n}};\n\n#endif", output)
     }
 
-    pub fn print_macro(&self, width: u32, height: u32) -> String {
+    fn print_macro(&self, width: u32, height: u32) -> String {
         format!(
             "#ifndef {}_H_
 #define {}_H_\n
@@ -99,6 +88,13 @@ static const unsigned char {}[{}_IDX_CNT][{}_BYTES_PER_CHAR] = {{",
             self.array_name.to_uppercase(),
             self.array_name.to_uppercase(),
         )
+    }
+}
+
+pub fn is_valid_file(path: &std::path::PathBuf) -> bool {
+    match path.extension().and_then(std::ffi::OsStr::to_str) {
+        Some("png") => true,
+        _ => false,
     }
 }
 
