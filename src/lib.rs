@@ -4,6 +4,7 @@
 //! Example: cargo run font_13px font_s > font_s.h
 
 use image::Luma;
+use std::error::Error;
 use std::path::Path;
 
 pub struct FontToBytes {
@@ -13,23 +14,23 @@ pub struct FontToBytes {
 }
 
 impl FontToBytes {
-    pub fn new(mut args: std::env::Args) -> Result<FontToBytes, &'static str> {
+    pub fn new(mut args: std::env::Args) -> Result<FontToBytes, Box<dyn Error>> {
         args.next(); // skip the first argument which is the name of the program
 
         let folder = match args.next() {
             Some(arg) => arg,
-            None => return Err("no folder specified. Usage: cargo run path_to_image_folder name_of_array > filename_to_be_saved.h"),
+            None => return Err("no folder specified. Usage: cargo run path_to_image_folder name_of_array > filename_to_be_saved.h".into()),
         };
 
         let array_name = match args.next() {
             Some(arg) => arg,
-            None => return Err("no array name specified. Usage: cargo run path_to_image_folder name_of_array > filename_to_be_saved.h")
+            None => return Err("no array name specified. Usage: cargo run path_to_image_folder name_of_array > filename_to_be_saved.h".into())
         };
 
         let mut files: Vec<String> = vec![];
-        for file in std::fs::read_dir(&Path::new(&folder)).unwrap() {
+        for file in std::fs::read_dir(&Path::new(&folder))? {
             let path = file.unwrap().path();
-            if is_valid_file(&path) {
+            if let Some("png") = path.extension().and_then(std::ffi::OsStr::to_str) {
                 let file_name = path
                     .file_name()
                     .and_then(|name| name.to_str().map(String::from));
@@ -88,13 +89,6 @@ static const unsigned char {}[{}_IDX_CNT][{}_BYTES_PER_CHAR] = {{",
             self.array_name.to_uppercase(),
             self.array_name.to_uppercase(),
         )
-    }
-}
-
-pub fn is_valid_file(path: &std::path::PathBuf) -> bool {
-    match path.extension().and_then(std::ffi::OsStr::to_str) {
-        Some("png") => true,
-        _ => false,
     }
 }
 
