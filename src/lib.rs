@@ -70,27 +70,18 @@ impl FontToBytes {
 
     fn print_macro(&self, width: u32, height: u32) -> String {
         format!(
-            "#ifndef {}_H_
-#define {}_H_\n
-#define {}_IDX_CNT          ({}u)
-#define {}_WIDTH_BYTES      ({}u)
-#define {}_HEIGHT_ROWS      ({}u)
-#define {}_BYTES_PER_CHAR   ({}_HEIGHT_ROWS * {}_WIDTH_BYTES)\n
-static const unsigned char {}[{}_IDX_CNT][{}_BYTES_PER_CHAR] = {{",
-            self.array_name.to_uppercase(),
-            self.array_name.to_uppercase(),
+            "#ifndef {0}_H_
+#define {0}_H_\n
+#define {0}_IDX_CNT          ({1}u)
+#define {0}_WIDTH_BYTES      ({2}u)
+#define {0}_HEIGHT_ROWS      ({3}u)
+#define {0}_BYTES_PER_CHAR   ({0}_HEIGHT_ROWS * {0}_WIDTH_BYTES)\n
+static const unsigned char {4}[{0}_IDX_CNT][{0}_BYTES_PER_CHAR] = {{",
             self.array_name.to_uppercase(),
             self.files.len(),
-            self.array_name.to_uppercase(),
             width / 8,
-            self.array_name.to_uppercase(),
             height,
-            self.array_name.to_uppercase(),
-            self.array_name.to_uppercase(),
-            self.array_name.to_uppercase(),
             self.array_name,
-            self.array_name.to_uppercase(),
-            self.array_name.to_uppercase(),
         )
     }
 }
