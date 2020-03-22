@@ -4,6 +4,7 @@
 //! Example: cargo run font_13px font_s > font_s.h
 
 use image::Luma;
+use rayon::prelude::*;
 use std::error::Error;
 use std::path::Path;
 
@@ -27,7 +28,7 @@ impl FontToBytes {
             None => return Err("no array name specified. Usage: cargo run path_to_image_folder name_of_array > filename_to_be_saved.h".into())
         };
 
-        let mut files = std::fs::read_dir(&Path::new(&folder))?
+        let mut files: Vec<String> = std::fs::read_dir(&Path::new(&folder))?
             .filter_map(|entry| {
                 entry.ok().and_then(|e| {
                     match e.path().extension().and_then(std::ffi::OsStr::to_str) {
@@ -39,7 +40,7 @@ impl FontToBytes {
                     }
                 })
             })
-            .collect::<Vec<String>>();
+            .collect();
 
         files.sort();
 
@@ -54,18 +55,26 @@ impl FontToBytes {
         let path = format!("{}/{}", self.folder, self.files[0]);
         let (width, height) = image::open(path).unwrap().to_luma().dimensions();
 
-        let mut output = self.print_macro(width, height);
+        let macro_defs = self.print_macro(width, height);
 
-        for file in self.files.iter() {
-            let path = format!("{}/{}", self.folder, file);
-            let arr = match print_array(Path::new(&path)) {
-                Ok(f) => f,
-                _ => String::from(""),
-            };
-            output += &arr;
-        }
+        let body = &self
+            .files
+            .par_iter()
+            .filter_map(|file| {
+                let path = format!("{}/{}", self.folder, file);
+                match print_array(Path::new(&path)) {
+                    Ok(f) => Some(f),
+                    _ => None,
+                }
+            })
+            .collect::<Vec<_>>()
+            .join("");
 
-        format!("{}\n}};\n\n#endif", output)
+        format!(
+            "{macro_defs:}{body:}\n}};\n\n#endif",
+            macro_defs = macro_defs,
+            body = body
+        )
     }
 
     fn print_macro(&self, width: u32, height: u32) -> String {
@@ -100,7 +109,7 @@ fn print_array(path: &Path) -> Result<String, &'static str> {
         }
 
         if bit % 8 == 7 {
-            output = format!("{}0x{:02x},", output, byte);
+            output.push_str(&format!("{:#02X},", byte));
             byte = 0;
         }
 
